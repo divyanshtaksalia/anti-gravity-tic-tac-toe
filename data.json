@@ -1,0 +1,7 @@
+{
+    "games_played": 3,
+    "scores": {
+        "player": 1,
+        "computer": 2
+    }
+}

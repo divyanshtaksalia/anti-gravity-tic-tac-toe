@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Gravity Tic-Tac-Toe</title>
+    <style>
+        body {
+            margin: 0;
+            background-image: url("https://wallpapercave.com/wp/wp12513546.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+            color: #00f2ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container { text-align: center; }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #00f2ff;
+            color: #00f2ff;
+            padding: 15px 40px;
+            font-size: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            box-shadow: 0 0 10px #00f2ff;
+            margin: 10px;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background: #00f2ff;
+            color: #000;
+            box-shadow: 0 0 30px #00f2ff;
+        }
+
+        .hidden { display: none; }
+        #difficulty-levels { margin-top: 10px; }
+        
+        .float { animation: floating 3s ease-in-out infinite; }
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 15px;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #00f2ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(0, 242, 255, 0.05);
+            transition: 0.3s;
+            border-radius: 10px;
+        }
+
+        .cell:hover { background: rgba(0, 242, 255, 0.2); }
+
+        .symbol {
+            display: inline-block;
+            animation: floatSymbol 2.5s ease-in-out infinite;
+            text-shadow: 0 0 15px #00f2ff;
+        }
+
+        @keyframes floatSymbol {
+            0%, 100% { transform: translateZ(20px) translateY(0px) rotate(5deg); }
+            50% { transform: translateZ(40px) translateY(-10px) rotate(-5deg); }
+        }
+
+        .winner-cell {
+            background: rgba(0, 242, 255, 0.4) !important;
+            box-shadow: 0 0 40px #00f2ff !important;
+            border: 3px solid #fff !important;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        #victory-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border: 2px solid #00f2ff;
+            box-shadow: 0 0 50px #00f2ff;
+            text-align: center;
+            z-index: 100;
+            border-radius: 20px;
+        }
+    
+
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="container">
+        <h1 class="float">MADE WITH 😜 <br> TIC-TAC-TOE</h1>
+        <button class="btn" onclick="showPage2()">Play</button>
+    </div>
+
+    <div id="page2" class="container hidden">
+        <h2 class="float">Select Game Mode</h2>
+        <button class="btn" onclick="toggleDifficulty()">Play with Computer</button>
+        <div id="difficulty-levels" class="hidden">
+            <button class="btn" style="font-size: 14px;" onclick="startGame('easy')">Easy</button>
+            <button class="btn" style="font-size: 14px;" onclick="startGame('medium')">Medium</button>
+            <button class="btn" style="font-size: 14px;" onclick="startGame('hard')">Hard</button>
+        </div>
+        <br>
+        <button class="btn" onclick="startGame('friend')">With Friend (Same Device)</button>
+        <br>
+        <button class="btn" onclick="startGame('online')">With Friend (Online)</button>
+    </div>
+
+    <div id="online-menu" class="container hidden">
+    <h2 class="float">Online Multiplayer</h2>
+    <input type="text" id="room-input" placeholder="Enter Room Code" style="padding: 10px; border-radius: 5px;">
+    <br><br>
+    <button class="btn" onclick="createRoom()" style="font-size: 14px;">Create Room</button>
+    <button class="btn" onclick="joinRoom()" style="font-size: 14px;">Join Room</button>
+    <br><br>
+    <button class="btn" onclick="resetGame()" style="font-size: 12px;">Back</button>
+</div>
+
+
+    <div id="game-page" class="container hidden">
+    <div style="display: flex; justify-content: space-around; font-size: 20px; margin-bottom: 10px; background: rgba(0,242,255,0.1); padding: 10px; border-radius: 10px;">
+        <div>Player X: <span id="score-x">0</span></div>
+        <div>Player O: <span id="score-o">0</span></div>
+    </div>
+        <div id="status" style="margin-bottom: 20px; font-size: 24px;">Your Turn (X)</div>
+        <div class="grid" id="board-container">
+            <div class="cell" onclick="makeMove(0)"></div>
+            <div class="cell" onclick="makeMove(1)"></div>
+            <div class="cell" onclick="makeMove(2)"></div>
+            <div class="cell" onclick="makeMove(3)"></div>
+            <div class="cell" onclick="makeMove(4)"></div>
+            <div class="cell" onclick="makeMove(5)"></div>
+            <div class="cell" onclick="makeMove(6)"></div>
+            <div class="cell" onclick="makeMove(7)"></div>
+            <div class="cell" onclick="makeMove(8)"></div>
+        </div>
+        <br>
+        <button class="btn" onclick="resetGame()" style="padding: 10px 20px; font-size: 16px;">Main Menu</button>
+    </div>
+
+    <div id="victory-screen" class="hidden">
+        <h1 id="winner-text" class="float">X WINS!</h1>
+        <button class="btn" onclick="resetGame()">Play Again</button>
+    </div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io("http://127.0.0.1:5000"); // Backend se connection
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let currentGameMode = "";
+    let isGameOver = false;
+    let mySymbol = "X"; 
+    let currentRoom = "";
+    let scores = { X: 0, O: 0 }; // Global scores
+
+    function showPage2() {
+        document.getElementById('page1').classList.add('hidden');
+        document.getElementById('page2').classList.remove('hidden');
+    }
+
+    function toggleDifficulty() {
+        document.getElementById('difficulty-levels').classList.toggle('hidden');
+    }
+
+    function startGame(mode) {
+        currentGameMode = mode;
+        resetRoundLogic(); // Naya function board reset ke liye
+        
+        // UI reset
+        document.getElementById('page2').classList.add('hidden');
+        document.getElementById('online-menu').classList.add('hidden');
+        document.getElementById('game-page').classList.add('hidden');
+        document.getElementById('victory-screen').classList.add('hidden');
+
+        if (mode === 'online') {
+            document.getElementById('online-menu').classList.remove('hidden');
+        } else {
+            document.getElementById('game-page').classList.remove('hidden');
+            document.getElementById('status').innerText = "Your Turn (X)";
+        }
+    }
+
+    function makeMove(index) {
+        if (board[index] !== "" || isGameOver) return;
+
+        if (currentGameMode === 'online') {
+            if (currentPlayer !== mySymbol) return;
+            board[index] = mySymbol;
+            renderBoard();
+            socket.emit('make_online_move', { room: currentRoom, index: index, symbol: mySymbol });
+            if (!checkWinner()) {
+                currentPlayer = (mySymbol === "X") ? "O" : "X";
+                document.getElementById('status').innerText = "Friend's Turn...";
+            }
+        } else {
+            board[index] = currentPlayer;
+            renderBoard();
+            if (checkWinner()) return;
+
+            if (['easy', 'medium', 'hard'].includes(currentGameMode)) {
+                currentPlayer = "O";
+                document.getElementById('status').innerText = "Computer thinking...";
+                setTimeout(getComputerMove, 600);
+            } else {
+                currentPlayer = (currentPlayer === "X") ? "O" : "X";
+                document.getElementById('status').innerText = `${currentPlayer}'s Turn`;
+            }
+        }
+    }
+
+    function renderBoard() {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, i) => {
+            cell.innerHTML = board[i] !== "" ? `<span class="symbol">${board[i]}</span>` : "";
+            cell.classList.remove('winner-cell');
+        });
+    }
+
+    function checkWinner() {
+        const winPatterns = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        for (let p of winPatterns) {
+            if (board[p[0]] && board[p[0]] === board[p[1]] && board[p[0]] === board[p[2]]) {
+                isGameOver = true;
+                p.forEach(idx => document.querySelectorAll('.cell')[idx].classList.add('winner-cell'));
+                handleVictory(board[p[0]]);
+                return true;
+            }
+        }
+        if (!board.includes("")) { 
+            isGameOver = true; 
+            handleVictory("Draw"); 
+            return true; 
+        }
+        return false;
+    }
+
+    function handleVictory(winner) {
+        if (winner !== "Draw") {
+            scores[winner]++;
+            document.getElementById(`score-${winner.toLowerCase()}`).innerText = scores[winner];
+        }
+
+        // RACE TO 5 POINTS
+        if (scores.X === 5 || scores.O === 5) {
+            const ultimateWinner = scores.X === 5 ? "X" : "O";
+            document.getElementById('winner-text').innerText = "🏆 " + ultimateWinner + " IS THE SUPREME CHAMPION!";
+            document.getElementById('victory-screen').classList.remove('hidden');
+            
+            // Database mein save karein
+            fetch('/save_score', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ winner: ultimateWinner }) 
+            });
+        } else {
+            // Agla Round
+            document.getElementById('status').innerText = winner === "Draw" ? "It's a Draw! Next Round..." : `${winner} Points! Next Round...`;
+            setTimeout(resetRoundLogic, 1500);
+        }
+    }
+
+    function resetRoundLogic() {
+        board = ["", "", "", "", "", "", "", "", ""];
+        isGameOver = false;
+        currentPlayer = "X";
+        renderBoard();
+        if(currentGameMode !== 'online') {
+            document.getElementById('status').innerText = "New Round! Your Turn (X)";
+        }
+    }
+
+    function resetGame() {
+        window.location.reload(); // Poora game reset karne ke liye
+    }
+
+    function getComputerMove() {
+        if (isGameOver) return;
+        fetch('/get_move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ board: board, level: currentGameMode })
+        }).then(res => res.json()).then(data => {
+            if (data.move !== null && board[data.move] === "") {
+                board[data.move] = "O";
+                renderBoard();
+                if (!checkWinner()) {
+                    currentPlayer = "X";
+                    document.getElementById('status').innerText = "Your Turn (X)";
+                }
+            }
+        });
+    }
+
+    // --- ONLINE ACTIONS ---
+    function createRoom() {
+        currentRoom = document.getElementById('room-input').value;
+        if (currentRoom) {
+            mySymbol = "X";
+            socket.emit('create_room', { room: currentRoom });
+            document.getElementById('online-menu').classList.add('hidden');
+            document.getElementById('game-page').classList.remove('hidden');
+            document.getElementById('status').innerText = "Waiting for Friend...";
+        }
+    }
+
+    function joinRoom() {
+        currentRoom = document.getElementById('room-input').value;
+        if (currentRoom) {
+            mySymbol = "O";
+            socket.emit('join_room', { room: currentRoom });
+        }
+    }
+
+    // --- SOCKET EVENTS ---
+    socket.on('game_start', (data) => {
+        mySymbol = data.symbol || mySymbol;
+        document.getElementById('online-menu').classList.add('hidden');
+        document.getElementById('game-page').classList.remove('hidden');
+        document.getElementById('status').innerText = "Game Started! You are " + mySymbol;
+    });
+
+    socket.on('player_joined', () => {
+        document.getElementById('status').innerText = "Friend Joined! Your Turn (X)";
+    });
+
+    socket.on('move_made', (data) => {
+        board[data.index] = data.symbol;
+        renderBoard();
+        if(!checkWinner()) {
+            currentPlayer = mySymbol;
+            document.getElementById('status').innerText = "Your Turn (" + mySymbol + ")";
+        }
+    });
+</script>
+</body>
+</html>
