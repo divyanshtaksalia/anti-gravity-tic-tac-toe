@@ -174,7 +174,7 @@
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-    const socket = io("http://127.0.0.1:5000"); // Backend se connection
+    const socket = io(); // Backend se connection
     let board = ["", "", "", "", "", "", "", "", ""];
     let currentPlayer = "X";
     let currentGameMode = "";
